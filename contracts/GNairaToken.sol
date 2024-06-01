@@ -60,7 +60,7 @@ contract GNairaToken is ERC20, ERC20Capped, ERC20Burnable {
         _isBlacklisted[account] = false;
     }
 
-    function _beforetokentransfer(
+    function _beforeTokentransfer(
         address from,
         address to,
         uint256 amount
