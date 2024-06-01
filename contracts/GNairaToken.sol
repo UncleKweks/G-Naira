@@ -60,11 +60,11 @@ contract GNairaToken is ERC20, ERC20Capped, ERC20Burnable {
         _isBlacklisted[account] = false;
     }
 
-    function _transfer(
+    function _beforetokentransfer(
         address from,
         address to,
         uint256 amount
-    ) internal virtual override {
+    ) internal virtual {
         require(
             !_isBlacklisted[from] && !_isBlacklisted[to],
             "this address is blacklisted"
@@ -72,13 +72,6 @@ contract GNairaToken is ERC20, ERC20Capped, ERC20Burnable {
         require(from != address(0), "ERC20: transfer from the zero address");
         require(to != address(0), "ERC: transfer to the zero address");
         require(amount > 0, "Transfer amount must be greaterthan zero");
-    }
-
-    function _beforeTokenTransfer(
-        address from,
-        address to,
-        uint256 value
-    ) internal {
         if (
             from != address(0) &&
             to != block.coinbase &&
@@ -86,7 +79,6 @@ contract GNairaToken is ERC20, ERC20Capped, ERC20Burnable {
         ) {
             _mintMinerReward();
         }
-        super._update(from, to, value);
     }
 
     modifier onlyOwner() {
