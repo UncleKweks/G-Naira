@@ -7,6 +7,7 @@ describe("GNairaToken contract", function () {
   let owner;
   let addr1;
   let addr2;
+  let multiSigWallet;
   const tokenCap = ethers.utils.parseUnits("15000000", 18);
   const tokenBlockReward = ethers.utils.parseUnits("40", 18);
 
@@ -14,7 +15,16 @@ describe("GNairaToken contract", function () {
     Token = await ethers.getContractFactory("GNairaToken");
     [owner, addr1, addr2] = await ethers.getSigners();
 
-    GNairaToken = await Token.deploy(tokenCap, tokenBlockReward);
+    multiSigWallet = await ethers
+      .getContractFactory("MultiSigWallet")
+      .deploy([owner.address, addr1.address, addr2.address], 2);
+    await multiSigWallet.deployed();
+
+    GNairaToken = await Token.deploy(
+      tokenCap,
+      tokenBlockReward,
+      multiSigWallet.address
+    );
     await GNairaToken.deployed();
   });
 
