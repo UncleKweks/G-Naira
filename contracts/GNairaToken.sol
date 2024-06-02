@@ -15,16 +15,53 @@ import "./MultiSigWallet.sol";
 contract GNairaToken is ERC20, ERC20Capped, ERC20Burnable {
     address payable public owner;
     uint256 public blockReward;
+    address public governor;
+    MultiSigWallet public multiSigWallet;
 
     mapping(address => bool) public _isBlacklisted;
 
+    modifier onlyGovernor() {
+        require(
+            msg.sender == governor,
+            "Only governor can call this function!"
+        );
+        _;
+    }
+
+    modifier onlyMultiSigApproved() {
+        require(
+            multiSigWallet.isApproved(msg.sender),
+            "MultiSig approval required!"
+        );
+        _;
+    }
+
     constructor(
         uint256 cap,
-        uint256 reward
+        uint256 reward,
+        address _multiSigWallet
     ) ERC20("GNairaToken", "gNGN") ERC20Capped(cap) {
         owner = payable(msg.sender);
         _mint(owner, cap);
         blockReward = reward;
+        multiSigWallet = MultiSigWallet(payable(_multiSigWallet));
+    }
+
+    function mintWithMultiSig(
+        address account,
+        uint256 amount
+    ) external onlyGovernor onlyMultiSigApproved {
+        _mint(account, amount);
+    }
+
+    function burnWithMultiSig(
+        uint256 amount
+    ) external onlyGovernor onlyMultiSigApproved {
+        _burn(msg.sender, amount);
+    }
+
+    function setGovernor(address _governor) external onlyOwner {
+        governor = _governor;
     }
 
     function _update(

@@ -1,6 +1,11 @@
 require("dotenv").config();
 const { ethers } = require("hardhat");
 
+async function deployMultiSigWallet() {
+  // Deploy or retrieve the MultiSigWallet address
+  // Implement your logic here
+}
+
 async function main() {
   const [deployer] = await ethers.getSigners();
 
@@ -9,7 +14,8 @@ async function main() {
   const GNairaToken = await ethers.getContractFactory("GNairaToken");
   const tokenCap = ethers.utils.parseUnits("10000000", 18);
   const tokenBlockReward = ethers.utils.parseUnits("50", 18);
-  const multiSigWalletAddress = "0x532201d4dd9767d659dc95595d04bf7feec5f659";
+  const multiSigWalletAddress = await deployMultiSigWallet();
+
   const gNairaToken = await GNairaToken.deploy(
     tokenCap,
     tokenBlockReward,
