@@ -9,7 +9,6 @@ pragma solidity ^0.8.24;
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Capped.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
 import "./MultiSigWallet.sol";
 
 contract GNairaToken is ERC20, ERC20Capped, ERC20Burnable {
@@ -39,12 +38,13 @@ contract GNairaToken is ERC20, ERC20Capped, ERC20Burnable {
     constructor(
         uint256 cap,
         uint256 reward,
-        address _multiSigWallet
+        address[] memory owners,
+        uint256 requiredConfirmations
     ) ERC20("GNairaToken", "gNGN") ERC20Capped(cap) {
-        owner = payable(msg.sender);
-        _mint(owner, cap);
+        governor = msg.sender;
         blockReward = reward;
-        multiSigWallet = MultiSigWallet(payable(_multiSigWallet));
+        multiSigWallet = new MultiSigWallet(owners, requiredConfirmations);
+        _mint(address(multiSigWallet), cap);
     }
 
     function mintWithMultiSig(
@@ -97,7 +97,7 @@ contract GNairaToken is ERC20, ERC20Capped, ERC20Burnable {
         _isBlacklisted[account] = false;
     }
 
-    function _beforeTokentransfer(
+    function _beforeTokenTransfer(
         address from,
         address to,
         uint256 amount

@@ -9,11 +9,24 @@ async function main() {
   const GNairaToken = await ethers.getContractFactory("GNairaToken");
   const tokenCap = ethers.utils.parseUnits("10000000", 18);
   const tokenBlockReward = ethers.utils.parseUnits("50", 18);
-  const multiSigWalletAddress = "0x532201d4dd9767d659dc95595d04bf7feec5f659";
+
+  const owners = [
+    "0x51C78a61C4CF196c7cb46CF5170728a571718099",
+    "0x66020133CD2812B66459882E01003CfBa31189B4",
+    "0xC4b033d10Ab097cb12A872398E019499393eE34b",
+  ];
+  const requiredConfirmations = 2;
+
+  console.log("Token Cap:", tokenCap.toString());
+  console.log("Token Block Reward:", tokenBlockReward.toString());
+  console.log("Owners:", owners);
+  console.log("Required Confirmations:", requiredConfirmations);
+
   const gNairaToken = await GNairaToken.deploy(
     tokenCap,
     tokenBlockReward,
-    multiSigWalletAddress
+    owners,
+    requiredConfirmations
   );
   await gNairaToken.deployed();
 
@@ -37,6 +50,6 @@ main()
     process.exit(0);
   })
   .catch((error) => {
-    console.error(error);
+    console.error("Deployment failed:", error);
     process.exit(1);
   });

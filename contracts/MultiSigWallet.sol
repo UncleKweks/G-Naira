@@ -45,10 +45,6 @@ contract MultiSigWallet {
 
     constructor(address[] memory _owners, uint _required) {
         require(_owners.length > 0, "owners required");
-        require(
-            required > 0 && _required <= owners.length,
-            "invalid required number of owners"
-        );
 
         for (uint i; i < _owners.length; i++) {
             address owner = _owners[i];
@@ -58,6 +54,12 @@ contract MultiSigWallet {
             isOwner[owner] = true;
             owners.push(owner);
         }
+
+        require(
+            _required > 0 && _required <= owners.length,
+            "invalid required number of owners"
+        );
+
         required = _required;
     }
 
