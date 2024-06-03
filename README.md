@@ -1,85 +1,124 @@
 # GNairaToken Project
 ## Overview
 The GNairaToken project consists of two main smart contracts:
+GNairaToken is a custom ERC20 token with additional functionalities such as minting, burning, and blacklisting. This contract also integrates a multi-signature wallet for enhanced security of minting and burning operations. The contract is designed to follow the ERC20 standard while introducing features to manage and secure the token effectively.
 
-1. GNairaToken: An ERC20 token with additional features such as capping, burning, and block rewards. <br>
-2. MultiSigWallet: A multi-signature wallet for managing transactions securely.
+## Features
+1. **ERC20 Standard Compliance:<br>**
+   * The GNairaToken adheres to the ERC20 standard, ensuring compatibility with existing wallets and exchanges.
 
-## Smart Contracts
-### GNairaToken
-`GNairaToken` is an ERC20 token with a capped supply, burnable functionality, and block rewards for miners.
+2. **Capped Supply:<br>**
+* The total supply of GNairaToken is capped, preventing the creation of tokens beyond a specified limit..
 
-Key Features:
+3. **Burnable Tokens: <br>**
+* Tokens can be burned (destroyed), reducing the total supply.
 
-* Capped Supply: Limits the maximum number of tokens that can be minted.<br>
-* Burnable: Allows tokens to be destroyed, reducing the total supply.<br>
-* Block Rewards: Rewards miners with tokens for including transactions in blocks.   
+4. **Blacklisting: <br>**
+* Addresses can be blacklisted to prevent them from sending or receiving tokens.
 
+5. **Governor Role:<br>**
+* A special role called 'Governor' is defined, which has exclusive rights to perform critical actions such as minting, burning, and managing the blacklist.
 
-### MultiSigWallet
-`MultiSigWallet` is a multi-signature wallet that requires multiple approvals for executing transactions. <br>
+6.** Block Reward:<br>**
+* A reward is given to miners for including transactions in blocks, promoting network participation.
 
-Key Features:
-
-* Multi-Signature Transactions: Requires a specified number of approvals from owners to execute a transaction. <br>
-* Revoke Approvals: Owners can revoke their approvals if necessary. <br>
-* Transaction Management: Allows owners to submit, approve, revoke, and execute transactions. <br>
-
-
-## Development Environment
-
-### Tools Used
-* Solidity: The programming language used for writing smart contracts. <br>
-* Remix IDE: A browser-based IDE for developing, deploying, and testing smart contracts. <br>
-* Hardhat: A development environment to compile, deploy, test, and debug Ethereum software. <br>
-* OpenZeppelin: A library for secure smart contract development.
-* Mocha: A JavaScript test framework for Node.js. <br>
-* Chai: A BDD / TDD assertion library for Node.js and the browser.<br>
-
-## Dependencies <br>
-Ensure you have the following dependencies installed: <br>
-`npm install` <br>
-
-`npm i hardhat` 
-
-## Setup Instructions <br>
-1. Clone the Repository: <br>
-    `git clone https://github.com/Uncle Kweks/gnaiaratoken-project.git
-cd gnaiaratoken-project
-`
-
-2. Install Dependencies: <br>
-   `npm install`
-
-3. Compile the Contracts:
-   `npx hardhat compile` 
-
-4. Deploy the Contracts:
-   `npx hardhat run scripts/deploy.js --network <your_network>
-`
-
-5. Run Tests:
-   `npx hardhat test`
-
-## Testing 
-Unit tests for the `GNairaToken` contract are written using Hardhat and Chai. Ensure you have the development dependencies installed and run the tests using Hardhat. <br>
-
-
-## Deployment Script
-The deployment script `deploy.js` deploys the GNairaToken contract and logs the contract address and token supply. <br>
-
-`node scripts/deploy.cjs`
+7. **Multi-Signature Wallet Integration:<br>**
+* The contract integrates with a MultiSigWallet to secure the minting and burning operations, requiring multiple approvals before these actions can be executed.
 
 
 
-## Environment Variables
-Create a `.env` file in the root directory of your project and add the following variables:
 
-`PRIVATE_KEY=<your_private_key> <br>`
 
-`INFURA_API_KEY=<your_infura_api_key>`
+## Contract Details
+### * Parameters:<br>
+* **cap**: The maximum number of tokens that can ever exist. <br>
+* **reward**: The reward given to miners for including transactions in blocks.<br>
+* **owners**: An array of addresses that will own the multi-signature wallet.<br>
+*** requiredConfirmations**: The number of confirmations required for a transaction in the multi-signature wallet.<br>
 
-Replace `<your_private_key>` with your Ethereum account's private key and `<your_infura_api_key>` with your Infura project ID.
+## Governor Functions
+ * mintWithMultiSig 
+
+    * Mints new tokens. Can only be called by the governor.<br>
+    * function mintWithMultiSig(address account, uint256 amount) external onlyGovernor <br>
+
+* burnWithMultiSig
+
+  * Burns tokens. Can only be called by the governor.<br>
+  * function burnWithMultiSig(uint256 amount) external onlyGovernor<br>
+
+* **setGovernor**
+
+  * Sets a new governor.<br>
+  * function setGovernor(address _governor) external onlyGovernor<br>
+
+* **setBlockReward<br>**
+  * Sets a new block reward.
+  *  function setBlockReward(uint256 reward) public onlyGovernor<br>
+
+
+ * **addToBlacklist**
+    * Adds addresses to the blacklist.
+    * function addToBlacklist(address[] calldata addresses) external onlyGovernor
+
+* **removeFromBlacklist**
+  * Removes an address from the blacklist.
+  * function removeFromBlacklist(address account) external onlyGovernor
+
+## Modifiers
+ * **onlyGovernor**
+      * Restricts function access to only the governor.
+      * modifier onlyGovernor()
+
+## Internal Functions
+   * _beforeTokenTransfer
+   * Overrides the _beforeTokenTransfer function to include blacklisting logic and block reward distribution.
+   * function _beforeTokenTransfer(address from, address to, uint256 amount) internal virtual
+  
+## Usage
+
+1. **Deployment**:
+
+   * Deploy the contract with the necessary parameters (cap, reward, owners, requiredConfirmations) using Remix or any other deployment tool.
+
+2. **Minting Tokens**:
+
+   * The governor can mint new tokens by calling mintWithMultiSig.
+
+3. **Burning Tokens**:
+
+   * The governor can burn tokens by calling burnWithMultiSig.
+
+4. **Managing the Blacklist**:
+
+   * The governor can add addresses to the blacklist using addToBlacklist and remove them using removeFromBlacklist.
+
+5. **Changing the Governor**:
+
+   * The current governor can appoint a new governor by calling setGovernor.
+
+6. **Setting the Block Reward**:
+
+   * The governor can update the block reward by calling setBlockReward.
+  
+## Multi-Signature Wallet
+The multi-signature wallet ensures that minting and burning operations are secure and require multiple approvals. This reduces the risk of unauthorized token minting or burning.  
+
+## Development and Testing
+1. Compile the Contract:
+
+      * Use Remix or another Solidity compiler to compile the contract.
+
+2. Deploy the Contract:
+
+      * Deploy the contract using Remix or another deployment tool. Make sure to pass the correct constructor parameters.
+3. nteract with the Contract:
+
+      * Use the deployed contract instance to interact with the functions defined in the contract. Ensure that the governor is the only one performing restricted actions.
+  
+
+## Conclusion
+The GNairaToken smart contract provides a secure and efficient way to manage an ERC20 token with additional functionalities like minting, burning, blacklisting, and block rewards. The integration with a multi-signature wallet ensures that critical operations are secured and require multiple approvals.  
 
 ## Additional Resources
 * [Solidity Documentation](https://docs.soliditylang.org/en/latest/index.html) <br>
