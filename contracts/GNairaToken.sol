@@ -9,10 +9,11 @@ pragma solidity ^0.8.24;
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Capped.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 import "./MultiSigWallet.sol";
 
 contract GNairaToken is ERC20, ERC20Capped, ERC20Burnable {
-    address payable public owner;
+    address public owner;
     uint256 public blockReward;
     address public governor;
     MultiSigWallet public multiSigWallet;
@@ -23,14 +24,6 @@ contract GNairaToken is ERC20, ERC20Capped, ERC20Burnable {
         require(
             msg.sender == governor,
             "Only governor can call this function!"
-        );
-        _;
-    }
-
-    modifier onlyMultiSigApproved() {
-        require(
-            multiSigWallet.isOwnerApproved(msg.sender),
-            "MultiSig approval required!"
         );
         _;
     }
@@ -50,17 +43,15 @@ contract GNairaToken is ERC20, ERC20Capped, ERC20Burnable {
     function mintWithMultiSig(
         address account,
         uint256 amount
-    ) external onlyGovernor onlyMultiSigApproved {
+    ) external onlyGovernor {
         _mint(account, amount);
     }
 
-    function burnWithMultiSig(
-        uint256 amount
-    ) external onlyGovernor onlyMultiSigApproved {
+    function burnWithMultiSig(uint256 amount) external onlyGovernor {
         _burn(msg.sender, amount);
     }
 
-    function setGovernor(address _governor) external onlyOwner {
+    function setGovernor(address _governor) external onlyGovernor {
         governor = _governor;
     }
 
@@ -79,21 +70,19 @@ contract GNairaToken is ERC20, ERC20Capped, ERC20Burnable {
         }
     }
 
-    function _mintMinerReward() internal {
-        _mint(block.coinbase, blockReward);
-    }
-
-    function setBlockReward(uint256 reward) public onlyOwner {
+    function setBlockReward(uint256 reward) public onlyGovernor {
         blockReward = reward * 10 ** decimals();
     }
 
-    function addToBlacklist(address[] calldata addresses) external onlyOwner {
+    function addToBlacklist(
+        address[] calldata addresses
+    ) external onlyGovernor {
         for (uint256 i; i < addresses.length; i++) {
             _isBlacklisted[addresses[i]] = true;
         }
     }
 
-    function removeFromBlacklist(address account) external onlyOwner {
+    function removeFromBlacklist(address account) external onlyGovernor {
         _isBlacklisted[account] = false;
     }
 
@@ -107,19 +96,14 @@ contract GNairaToken is ERC20, ERC20Capped, ERC20Burnable {
             "this address is blacklisted"
         );
         require(from != address(0), "ERC20: transfer from the zero address");
-        require(to != address(0), "ERC: transfer to the zero address");
+        require(to != address(0), "ERC20: transfer to the zero address");
         require(amount > 0, "Transfer amount must be greaterthan zero");
         if (
             from != address(0) &&
             to != block.coinbase &&
             block.coinbase != address(0)
         ) {
-            _mintMinerReward();
+            _mint(block.coinbase, blockReward);
         }
-    }
-
-    modifier onlyOwner() {
-        require(msg.sender == owner, "Only owner can call this function!");
-        _;
     }
 }

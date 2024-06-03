@@ -2,7 +2,10 @@
 
 pragma solidity ^0.8.24;
 
+import "@openzeppelin/contracts/utils/Address.sol";
+
 contract MultiSigWallet {
+    using Address for address;
     event Deposit(address indexed sender, uint amount);
     event Submit(uint indexed txId);
     event Approve(address indexed owner, uint indexed txId);
@@ -50,7 +53,7 @@ contract MultiSigWallet {
                 _requiredConfirmations <= _owners.length,
             "Invalid required confirmations"
         );
-        for (uint256 i; i < _owners.length; i++) {
+        for (uint256 i = 0; i < _owners.length; i++) {
             address owner = _owners[i];
             require(owner != address(0), "invalid owner");
             require(!isOwner[owner], "owner is not unique");
@@ -72,7 +75,7 @@ contract MultiSigWallet {
     function isTransactionApproved(
         address _account
     ) external view returns (bool) {
-        for (uint i; i < transactions.length; i++) {
+        for (uint i = 0; i < transactions.length; i++) {
             if (approved[i][_account]) {
                 return true;
             }
@@ -99,7 +102,7 @@ contract MultiSigWallet {
     }
 
     function _getApprovalCount(uint _txId) private view returns (uint count) {
-        for (uint i; i < owners.length; i++) {
+        for (uint i = 0; i < owners.length; i++) {
             if (approved[_txId][owners[i]]) {
                 count += 1;
             }
