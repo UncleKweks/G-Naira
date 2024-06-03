@@ -29,7 +29,7 @@ contract GNairaToken is ERC20, ERC20Capped, ERC20Burnable {
 
     modifier onlyMultiSigApproved() {
         require(
-            multiSigWallet.isApproved(msg.sender),
+            multiSigWallet.isOwnerApproved(msg.sender),
             "MultiSig approval required!"
         );
         _;
